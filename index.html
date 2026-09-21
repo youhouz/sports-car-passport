@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sports Car Passport – Historique + Expert IA Offline</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      top: 0.5rem;
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      background: #dc2626;
+      border: 2px solid white;
+    }
+    .timeline-line {
+      position: absolute;
+      left: -1.2rem;
+      top: 1.25rem;
+      bottom: -1rem;
+      width: 2px;
+      background: #e5e7eb;
+    }
+    #chat-messages { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen">
+  <header class="bg-black text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-red-600 rounded-lg flex items-center justify-center font-bold text-lg">SC</div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">Sports Car Passport</h1>
+          <p class="text-[10px] text-gray-400">Historique • Docs • Expert IA 100% offline</p>
+        </div>
+      </div>
+      <nav class="flex gap-1 md:gap-3 text-xs md:text-sm font-medium flex-wrap justify-end">
+        <button onclick="showView('dashboard')" class="px-2 py-1 rounded hover:bg-gray-800">Garage</button>
+        <button onclick="showView('add')" class="px-2 py-1 rounded hover:bg-gray-800">+ Event</button>
+        <button onclick="showView('timeline')" class="px-2 py-1 rounded hover:bg-gray-800">Timeline</button>
+        <button onclick="showView('value')" class="px-2 py-1 rounded hover:bg-gray-800">Valeur</button>
+        <button onclick="showView('expert')" class="px-2 py-1 rounded hover:bg-gray-800 bg-red-700">Expert IA</button>
+        <button onclick="showView('export')" class="px-2 py-1 rounded hover:bg-gray-800">PDF</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <section id="view-dashboard" class="view">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold">Mon garage</h2>
+        <p class="text-gray-600 text-sm">Tout est stocké localement. Aucune connexion nécessaire.</p>
+      </div>
+      <div id="cars-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
+      <button onclick="showView('add-car')" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-lg text-sm">+ Ajouter une voiture</button>
+    </section>
+
+    <section id="view-add-car" class="view hidden">
+      <h2 class="text-xl font-bold mb-4">Ajouter une voiture</h2>
+      <form id="add-car-form" class="bg-white rounded-xl shadow p-5 max-w-lg space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Marque & Modèle *</label>
+          <input type="text" id="car-model" required placeholder="BMW M2 Competition / Porsche 911 / AMG C63..." class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Année</label>
+            <input type="number" id="car-year" placeholder="2020" class="w-full border rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Km actuel</label>
+            <input type="number" id="car-km" placeholder="45000" class="w-full border rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">VIN</label>
+          <input type="text" id="car-vin" placeholder="WBS..." class="w-full border rounded-lg px-3 py-2 text-sm font-mono">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Immatriculation</label>
+          <input type="text" id="car-plate" placeholder="AB-123-CD" class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Mods / Notes</label>
+          <textarea id="car-notes" rows="2" placeholder="Stage 1, Akrapovic..." class="w-full border rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg text-sm">Enregistrer</button>
+          <button type="button" onclick="showView('dashboard')" class="bg-gray-200 px-5 py-2 rounded-lg text-sm">Annuler</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="view-add" class="view hidden">
+      <h2 class="text-xl font-bold mb-4">Ajouter un événement</h2>
+      <form id="add-event-form" class="bg-white rounded-xl shadow p-5 max-w-lg space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Voiture *</label>
+          <select id="event-car" required class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Type *</label>
+          <select id="event-type" required class="w-full border rounded-lg px-3 py-2 text-sm">
+            <option value="entretien">Entretien / Révision</option>
+            <option value="reparation">Réparation</option>
+            <option value="mod">Modification / Stage</option>
+            <option value="pneus">Pneus</option>
+            <option value="facture">Facture / Pièce</option>
+            <option value="ct">Contrôle technique</option>
+            <option value="assurance">Assurance</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Date *</label>
+            <input type="date" id="event-date" required class="w-full border rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Km</label>
+            <input type="number" id="event-km" placeholder="45000" class="w-full border rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Titre *</label>
+          <input type="text" id="event-title" required placeholder="Vidange + filtres / Stage 1..." class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Coût (€)</label>
+          <input type="number" id="event-cost" step="0.01" placeholder="450" class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Garage / Prestataire</label>
+          <input type="text" id="event-provider" placeholder="MG Motorsport..." class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Notes</label>
+          <textarea id="event-notes" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Photo facture (local)</label>
+          <input type="file" id="event-photo" accept="image/*" class="w-full text-sm">
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg text-sm">Ajouter</button>
+          <button type="button" onclick="showView('dashboard')" class="bg-gray-200 px-5 py-2 rounded-lg text-sm">Annuler</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="view-timeline" class="view hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">Timeline</h2>
+        <select id="timeline-car-filter" onchange="renderTimeline()" class="border rounded-lg px-3 py-1.5 text-sm"></select>
+      </div>
+      <div id="timeline-container" class="bg-white rounded-xl shadow p-5 pl-10 relative min-h-[200px]"></div>
+    </section>
+
+    <section id="view-value" class="view hidden">
+      <h2 class="text-xl font-bold mb-4">Estimation de valeur</h2>
+      <div class="bg-white rounded-xl shadow p-5 max-w-xl">
+        <p class="text-gray-600 text-sm mb-4">Estimation indicative basée sur ton historique. Pas une cote officielle.</p>
+        <select id="value-car" onchange="estimateValue()" class="w-full border rounded-lg px-3 py-2 text-sm mb-4"></select>
+        <div id="value-result" class="hidden p-4 bg-gray-50 rounded-lg border">
+          <div class="text-2xl font-bold text-red-600 mb-1" id="value-amount">— €</div>
+          <div class="text-sm text-gray-600" id="value-details"></div>
+        </div>
+        <button onclick="estimateValue()" class="mt-3 bg-black text-white font-semibold px-5 py-2 rounded-lg text-sm">Recalculer</button>
+      </div>
+    </section>
+
+    <section id="view-expert" class="view hidden">
+      <div class="mb-4">
+        <h2 class="text-xl font-bold">Expert IA – Spécialiste sportives</h2>
+        <p class="text-sm text-gray-600">100% offline. Base de connaissances intégrée (BMW M, AMG, Porsche, Audi RS…). Aucune API, aucune connexion.</p>
+      </div>
+      <div class="bg-white rounded-xl shadow overflow-hidden flex flex-col" style="height: 520px;">
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+        <div class="border-t p-3 bg-gray-50">
+          <div class="flex gap-2">
+            <input type="text" id="chat-input" placeholder="Ex: Problèmes M2 ? / Coût stage 1 C63 ? / Rod bearings ?" 
+                   class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                   onkeydown="if(event.key==='Enter') sendChat()">
+            <button onclick="sendChat()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm">Envoyer</button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <button onclick="askQuick('problèmes courants BMW M')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Problèmes BMW M</button>
+            <button onclick="askQuick('problèmes Porsche 911')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Problèmes 911</button>
+            <button onclick="askQuick('coût entretien AMG')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Coût entretien AMG</button>
+            <button onclick="askQuick('rod bearings')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Rod bearings</button>
+            <button onclick="askQuick('assurance sportive France')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Assurance</button>
+            <button onclick="askQuick('valeur revente modifiée')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Valeur modifiée</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-export" class="view hidden">
+      <h2 class="text-xl font-bold mb-4">Exporter le passeport PDF</h2>
+      <div class="bg-white rounded-xl shadow p-5 max-w-md">
+        <p class="text-gray-600 text-sm mb-4">PDF propre avec tout l’historique. Idéal pour revente.</p>
+        <select id="export-car" class="w-full border rounded-lg px-3 py-2 text-sm mb-4"></select>
+        <button onclick="exportPDF()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-lg text-sm w-full">Télécharger le PDF</button>
+        <p class="text-xs text-gray-500 mt-3">Tout reste sur ton appareil.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-500 border-t">
+    Sports Car Passport • 100% local • Expert IA offline intégré • Données uniquement dans ton navigateur
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
