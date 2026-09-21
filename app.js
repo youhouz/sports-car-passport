@@ -1,553 +1,304 @@
-// Sports Car Passport + Expert IA 100% Offline
-// Base de connaissances spécialisée voitures sportives intégrée
+// Sports Car Passport – Premium (SF Agency level)
+const KEY = 'scp_v3';
 
-const STORAGE_KEY = 'sportsCarPassport_v2';
-
-// ========== OFFLINE EXPERT ENGINE ==========
-const EXPERT_KB = [
-  {
-    keywords: ['rod bearing', 'rod bearings', 'coussinet', 'coussinets', 'bielles', 'e46', 'e39', 'e60', 's54', 's85', 's65'],
-    response: `**Rod bearings (coussinets de bielles)** – problème très connu sur plusieurs BMW M :
-• E46 M3 (S54) : usure prématurée fréquente. Beaucoup de propriétaires changent préventivement vers 80-100k km.
-• E60/E63 M5/M6 (S85 V10) : encore plus critique. Les coussinets d’origine ont des jeux trop faibles.
-• E90/E92 M3 (S65) : même famille de problèmes.
-
-**Conseils pratiques :**
-- Analyse d’huile régulière (spectro) pour détecter les particules de métal.
-- Changement préventif recommandé si tu gardes la voiture longtemps.
-- Utilise des coussinets aftermarket à jeu augmenté (ACL, King, etc.) + bon rodage.
-- Coût typique (pièces + main d’œuvre) : 2500–4500 € selon le modèle et le garage.
-
-Si tu as un modèle précis, dis-le-moi pour plus de détails.`
-  },
-  {
-    keywords: ['ims', 'roulement ims', 'boxster', 'cayman', '986', '987', '996', 'm96', 'm97'],
-    response: `**IMS Bearing (Intermediate Shaft Bearing)** – le point noir historique des Porsche 986/996/987/997 early :
-• Concerne surtout les moteurs M96/M97 (Boxster 986/987 et 911 996/997.1).
-• Défaillance = destruction du moteur (coût 15–25k€+).
-• Les versions dual-row early et single-row mid sont les plus risquées. Les LN Engineering / EPS solutions sont les plus connues.
-
-**Recommandations :**
-- Si la voiture n’a pas encore eu le remplacement IMS → c’est souvent un deal-breaker ou un argument de négociation fort.
-- Vérifie les factures. Un IMS changé + AOS + joints est un gros plus.
-- Sur les 997.2 et après (moteurs 9A1) le problème est résolu.
-
-Tu as le millésime exact et le numéro de moteur ?`
-  },
-  {
-    keywords: ['problèmes courants bmw m', 'problèmes bmw m', 'défauts bmw m', 'fiabilité bmw m', 'm2', 'm3', 'm4', 'm5'],
-    response: `**Problèmes courants sur les BMW M (vue d’ensemble) :**
-
-**M2/M3/M4 (F87, F80, F82, G80/G82) :**
-- B58/S55/S58 : globalement solides si entretien suivi.
-- Points de vigilance : vanne de décharge turbo (wastegate rattle), radiateur/expansion tank, injecteurs sur certains millésimes, transfert case sur xDrive.
-- Rod bearings beaucoup moins problématiques que sur les anciennes générations.
-
-**M5/M6 E60/E63 (S85) :**
-- Rod bearings + pompe vanos + SMG → budget entretien élevé.
-
-**M3 E46 (S54) :**
-- Rod bearings, vanos, joints de queue cover.
-
-**Conseil général :** carnet d’entretien complet + spécialistes indépendants (moins cher que la concession, souvent meilleurs sur ces modèles). Analyse d’huile tous les 8-10k km si tu pousses fort.`
-  },
-  {
-    keywords: ['problèmes porsche 911', 'problèmes 911', 'fiabilité 911', '911 problèmes'],
-    response: `**Problèmes fréquents Porsche 911 par génération :**
-
-• **996 (1999-2004)** : IMS bearing, AOS (Air Oil Separator), fuites joint de culasse arrière, RMS.
-• **997.1** : IMS encore présent (moins critique que 996), AOS, pompe à eau, radiateurs.
-• **997.2 / 991.1** : beaucoup plus fiables. Points d’attention : pompe haute pression (certains), chaînes de distribution sur quelques moteurs, électronique PCM.
-• **991.2 / 992** : globalement excellents. Coûts d’entretien et de pièces restent élevés.
-
-**Règle d’or :** un historique d’entretien Porsche ou spécialiste indépendant réputé + factures IMS/AOS sur les anciennes = énorme plus-value à la revente.`
-  },
-  {
-    keywords: ['coût entretien amg', 'entretien amg', 'prix entretien amg', 'amg cher'],
-    response: `**Coûts d’entretien typiques Mercedes-AMG (ordres de grandeur France) :**
-
-• Vidange + filtres (selon modèle) : 400–900 €
-• Freins complets (disques + plaquettes avant/arrière) : 1500–3500 € (carbone-céramique = beaucoup plus)
-• Pneus (train complet performance) : 1200–2500 €
-• Distribution / chaîne (si concerné) : 1500–4000 €
-• Turbo / pièces performance : très variable, souvent 2000€+
-
-Les pièces AMG sont parmi les plus chères du segment allemand. Beaucoup de propriétaires passent chez des spécialistes indépendants (économie 30-50% vs concession tout en gardant de très bons techniciens).
-
-Tu as un modèle précis (C63, E63, GT, A45…) ?`
-  },
-  {
-    keywords: ['assurance sportive', 'assurance sportive france', 'assurer sportive', 'prime assurance'],
-    response: `**Assurance voiture sportive en France – points clés :**
-
-• Les tarifs varient énormément selon : âge du conducteur, bonus/malus, zone, puissance fiscale, garage fermé, usage (trajet travail ou loisirs).
-• Jeunes / primo-assurés : souvent très cher ou refus. Parfois besoin du Bureau Central de Tarification (BCT).
-• Modifications (stage, échappement, etc.) doivent être déclarées → sinon risque de nullité en cas de sinistre.
-• Usage circuit : la plupart des contrats auto classiques excluent le track. Il faut une extension ou une assurance spécifique journée.
-
-**Astuces :**
-- Comparer plusieurs assureurs spécialisés (pas seulement les grands noms).
-- Garage fermé + alarme/traqueur = gros argument.
-- Kilométrage limité peut faire baisser la prime.
-
-Tu as quel profil (âge, modèle, usage) ?`
-  },
-  {
-    keywords: ['valeur revente modifiée', 'revente modifiée', 'cote modifiée', 'stage revente', 'mod impact valeur'],
-    response: `**Impact des modifications sur la valeur de revente :**
-
-Règle générale :
-- La plupart des mods ne se rentabilisent pas à 100%.
-- Sur le marché « généraliste » (concessions, particuliers non passionnés) → souvent une décote.
-- Sur le marché passionné (forums, groupes Facebook, sites spécialisés) → une préparation propre et documentée peut être un plus.
-
-**Ce qui aide :**
-- Factures complètes + photos avant/après
-- Pièces de qualité (Akrapovic, KW, Eventuri, etc.)
-- Stage réalisé par un préparateur reconnu + bande de puissance
-- Possibilité de revenir à l’origine (fichier stock conservé)
-
-**Ce qui fait fuir :**
-- Mods bricolées / sans factures
-- Trop extrême (bruit, look agressif)
-- Non déclaré à l’assurance
-
-Conseil : garde toujours les pièces d’origine.`
-  },
-  {
-    keywords: ['stage 1', 'reprogrammation', 'remap', 'stage 2', 'préparation'],
-    response: `**Stage / Reprogrammation – points importants :**
-
-• Stage 1 = optimisation cartographie (généralement admission d’origine). Gain typique 30-60 ch selon moteur.
-• Stage 2 = souvent downpipe + admission + map plus agressive.
-• Toujours faire réaliser par un préparateur sérieux avec banc de puissance (avant/après).
-• Déclare à l’assurance (sinon risque de non-couverture).
-• Sur les moteurs modernes (B58, S58, AMG M177, etc.) la fiabilité reste bonne si la map est qualitative et l’entretien suivi (huile, refroidissement).
-
-**Impact revente :** mitigé. Documenté + réversible = mieux accepté. Sinon certains acheteurs fuient.
-
-Tu vises quel moteur / quel gain ?`
-  },
-  {
-    keywords: ['garage spécialisé', 'spécialiste bmw', 'spécialiste porsche', 'indépendant', 'meilleur garage'],
-    response: `**Trouver un bon spécialiste (BMW M / AMG / Porsche) :**
-
-Les concessions sont chères et parfois moins expertes sur les préparations ou les modèles un peu anciens.
-Les indépendants de qualité sont souvent le meilleur rapport qualité/prix.
-
-**Comment choisir :**
-- Regarde les retours sur les forums (Motorsport-Passion, Rennlist, groupes Facebook marque)
-- Demande des photos d’ateliers et d’exemples de travaux
-- Vérifie s’ils ont l’outillage de diagnostic constructeur (ISTA, PIWIS, Xentry…)
-- Commence par une petite intervention (vidange, freins) pour tester
-
-Un bon spécialiste te fera souvent économiser de l’argent sur le long terme et connaîtra les points faibles de ton modèle.`
-  },
-  {
-    keywords: ['historique', 'histovec', 'carvertical', 'vérifier historique', 'arnaque occasion'],
-    response: `**Vérifier l’historique d’une sportive d’occasion :**
-
-1. **Histovec** (gratuit, officiel) → demande au vendeur de te générer le lien. Donne les changements de propriétaire, sinistres VRC, situation administrative.
-2. **CarVertical / Autoviza / etc.** → payant, plus d’infos internationales + photos d’annonces, mais attention aux erreurs (UFC-Que Choisir a pointé des approximations).
-3. **Contre-expertise** par un indépendant spécialisé dans la marque (150-300 €) → le plus important sur une sportive.
-4. **Factures d’entretien** complètes + carnet.
-
-Sur les sportives, un historique flou ou incomplet = risque élevé. Ne jamais acheter sans avoir croisé plusieurs sources.`
-  },
-  {
-    keywords: ['bonjour', 'salut', 'hello', 'coucou', 'qui es-tu', 'tu es qui'],
-    response: `Salut ! Je suis l’Expert IA intégré de Sports Car Passport.
-
-Je suis spécialisé dans les voitures sportives (BMW M, Mercedes-AMG, Porsche, Audi RS, etc.).
-
-Je fonctionne **100% offline** : toute ma base de connaissances est déjà dans l’application. Pas besoin de connexion internet.
-
-Pose-moi des questions sur :
-• Problèmes connus par modèle
-• Coûts d’entretien
-• Modifications / stages
-• Assurance
-• Valeur de revente
-• Conseils d’achat occasion
-
-Que veux-tu savoir ?`
-  }
+const KB = [
+  { k: ['rod bearing','coussinet','bielles','e46','e60','s54','s85','s65'], r: `**Rod bearings** – point critique sur plusieurs BMW M :\n• E46 M3 (S54), E60 M5 (S85), E9x M3 (S65) : usure prématurée fréquente.\n• Analyse d’huile recommandée. Changement préventif souvent vers 80-100k km.\n• Coût typique : 2 500 – 4 500 € chez un bon indépendant.\n• Coussinets aftermarket (jeu augmenté) + bon rodage = solution durable.` },
+  { k: ['ims','boxster','cayman','986','987','996','m96'], r: `**IMS Bearing** – le point noir des Porsche 986/996/997.1 :\n• Défaillance = casse moteur (15-25k€+).\n• Vérifie absolument si l’IMS a été remplacé (LN Engineering / EPS).\n• 997.2 et après : problème résolu.\n• Un IMS changé + AOS + joints = très gros plus à la revente.` },
+  { k: ['problèmes bmw m','fiabilité bmw m','m2','m3','m4'], r: `**BMW M – points de vigilance :**\n• Générations récentes (S55/S58/B58) : globalement solides si entretien suivi.\n• Wastegate rattle, expansion tank, injecteurs sur certains millésimes.\n• Anciennes (S54/S85/S65) : rod bearings + vanos.\n• Privilégie carnet complet + indépendant spécialisé plutôt que concession.` },
+  { k: ['problèmes 911','fiabilité 911','porsche 911'], r: `**Porsche 911 par génération :**\n• 996 : IMS + AOS + RMS.\n• 997.1 : IMS encore présent.\n• 997.2 / 991 : nettement plus fiables.\n• 992 : excellents, coûts d’entretien élevés.\nRègle d’or : historique Porsche ou spécialiste + factures = valeur.` },
+  { k: ['entretien amg','coût amg','amg cher'], r: `**Coûts AMG (ordres de grandeur FR) :**\n• Vidange : 400-900 €\n• Freins complets : 1 500-3 500 € (céramique beaucoup plus)\n• Pneus : 1 200-2 500 €\n• Indépendants compétents = 30-50 % d’économie vs concession.` },
+  { k: ['assurance sportive','assurer sportive'], r: `**Assurance sportive France :**\n• Très variable selon âge, bonus, zone, puissance, garage.\n• Jeunes / primo : souvent cher ou refus → BCT possible.\n• Mods à déclarer obligatoirement.\n• Circuit : exclusion quasi systématique des contrats classiques.` },
+  { k: ['revente modifiée','valeur modifiée','stage revente'], r: `**Mods & revente :**\n• Sur marché généraliste → souvent décote.\n• Sur marché passionné → docs + pièces de qualité = plus.\n• Garde toujours les pièces d’origine.\n• Stage documenté + réversible = mieux accepté.` },
+  { k: ['stage 1','reprogrammation','remap'], r: `**Stage / Remap :**\n• Stage 1 : +30-60 ch typique, admission d’origine.\n• Toujours chez un préparateur avec banc (avant/après).\n• Déclare à l’assurance.\n• Moteurs modernes (B58, S58, M177) tolèrent bien si map qualitative.` },
+  { k: ['bonjour','salut','hello','qui es-tu'], r: `Salut. Je suis l’Expert IA de Sports Car Passport.\nSpécialisé BMW M, AMG, Porsche, Audi RS.\n100 % offline – aucune connexion nécessaire.\nPose ta question (problèmes, coûts, stages, assurance, revente…).` }
 ];
 
-function getExpertResponse(userMessage) {
-  const msg = userMessage.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-  let bestMatch = null;
-  let bestScore = 0;
-
-  for (const entry of EXPERT_KB) {
-    let score = 0;
-    for (const kw of entry.keywords) {
-      if (msg.includes(kw.toLowerCase())) score += 2;
-      const words = kw.toLowerCase().split(' ');
-      words.forEach(w => { if (w.length > 3 && msg.includes(w)) score += 1; });
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = entry;
-    }
+function expert(msg) {
+  const t = msg.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  let best = null, score = 0;
+  for (const e of KB) {
+    let s = 0;
+    e.k.forEach(k => { if (t.includes(k)) s += 2; });
+    if (s > score) { score = s; best = e; }
   }
-
-  if (bestMatch && bestScore >= 2) {
-    return bestMatch.response;
-  }
-
-  if (msg.includes('prix') || msg.includes('coût') || msg.includes('combien')) {
-    return `Pour te donner un ordre de prix précis, j’ai besoin du modèle exact et de l’intervention.\n\nExemples de fourchettes générales (France) :\n• Vidange sportive : 250–800 €\n• Train de pneus performance : 1000–2500 €\n• Freins complets : 1200–4000 €\n• Stage 1 chez un bon préparateur : 600–1500 €\n\nDis-moi le modèle et ce que tu vises.`;
-  }
-
-  if (msg.includes('fiable') || msg.includes('fiabilité')) {
-    return `La fiabilité dépend énormément du modèle, de l’année et surtout de l’entretien précédent.\n\nRègle générale chez les sportives allemandes :\n• Un carnet complet + spécialistes = souvent très bon\n• Entretien négligé ou historique flou = risque élevé\n\nDonne-moi le modèle précis (ex: M2 Competition 2019, 991.2 GT3, C63 S 2017…) et je te donne les points de vigilance concrets.`;
-  }
-
-  return `Je n’ai pas une réponse ultra-précise sur ce point dans ma base actuelle.\n\nEssaie de reformuler avec le **modèle exact** (ex: « problèmes S55 », « coût freins C63 205 », « IMS 997.1 »).\n\nJe suis particulièrement fort sur :\n• BMW M (toutes générations)\n• Porsche 911 / Boxster / Cayman\n• Mercedes-AMG\n• Problèmes connus, coûts, stages, assurance, revente`;
+  if (best && score >= 2) return best.r;
+  if (t.includes('prix') || t.includes('coût') || t.includes('combien'))
+    return `Donne-moi le modèle exact + l’intervention pour un ordre de prix précis.\nExemples : vidange 250-800 € · pneus 1-2,5k € · freins 1,2-4k € · stage 1 600-1 500 €.`;
+  return `Reformule avec le modèle exact (ex. « problèmes S55 », « IMS 997.1 », « freins C63 »).\nJe suis fort sur BMW M, Porsche 911, AMG, coûts, stages, assurance et revente.`;
 }
 
-// ========== CHAT UI ==========
-function addMessage(text, isUser = false) {
-  const container = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `p-3 rounded-lg text-sm max-w-[90%] ${isUser ? 'bg-red-100 ml-auto' : 'bg-gray-100'}`;
-  div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || { cars: [], events: [] }; }
+  catch { return { cars: [], events: [] }; }
 }
+function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—'; }
 
-function sendChat() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  addMessage(text, true);
-  input.value = '';
-  setTimeout(() => {
-    const response = getExpertResponse(text);
-    addMessage(response, false);
-  }, 300 + Math.random() * 400);
-}
-
-function askQuick(text) {
-  document.getElementById('chat-input').value = text;
-  sendChat();
-}
-
-// ========== DATA LAYER ==========
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { cars: [], events: [] };
-    return JSON.parse(raw);
-  } catch (e) {
-    return { cars: [], events: [] };
-  }
-}
-
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-}
-
-// ========== VIEWS ==========
-function showView(viewName) {
-  document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
-  const target = document.getElementById('view-' + viewName);
-  if (target) target.classList.remove('hidden');
-
-  if (['add', 'timeline', 'value', 'export'].includes(viewName)) populateCarSelects();
-  if (viewName === 'dashboard') renderCars();
-  if (viewName === 'timeline') renderTimeline();
-  if (viewName === 'expert') {
-    const container = document.getElementById('chat-messages');
-    if (container && container.children.length === 0) {
-      addMessage(`Salut ! Je suis l’Expert IA intégré, spécialisé voitures sportives (BMW M, AMG, Porsche, Audi RS…).<br><br>Je tourne <strong>100% offline</strong> – aucune connexion nécessaire.<br><br>Pose ta question ou utilise les boutons rapides en bas.`, false);
+function go(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('v-' + name);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.v === name);
+  });
+  if (['add','timeline','value','export'].includes(name)) fillSelects();
+  if (name === 'dashboard') renderCars();
+  if (name === 'timeline') renderTimeline();
+  if (name === 'expert') {
+    const box = document.getElementById('chat-messages');
+    if (box && !box.children.length) {
+      addMsg(`Salut. Expert IA spécialisé sportives (BMW M, AMG, Porsche…).<br><br>100 % offline. Pose ta question ou utilise les boutons.`, false);
     }
   }
 }
 
-// ========== RENDER CARS ==========
 function renderCars() {
-  const data = loadData();
-  const container = document.getElementById('cars-list');
-  if (!data.cars.length) {
-    container.innerHTML = `<div class="col-span-full bg-white rounded-xl shadow p-8 text-center text-gray-500">
-      <p class="mb-2">Aucune voiture enregistrée.</p>
-      <p class="text-sm">Ajoute ta première sportive pour commencer.</p>
+  const d = load();
+  const box = document.getElementById('cars-list');
+  if (!d.cars.length) {
+    box.innerHTML = `<div class="card p-8 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center mx-auto mb-4 text-zinc-500 text-xl">+</div>
+      <p class="text-zinc-300 font-medium text-[15px]">Aucune voiture</p>
+      <p class="text-zinc-500 text-[13px] mt-1">Ajoute ta première sportive</p>
     </div>`;
     return;
   }
-
-  container.innerHTML = data.cars.map(car => {
-    const events = data.events.filter(e => e.carId === car.id);
-    const totalSpent = events.reduce((sum, e) => sum + (parseFloat(e.cost) || 0), 0);
-    const lastEvent = events.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    return `<div class="bg-white rounded-xl shadow overflow-hidden hover:shadow-md transition">
-      <div class="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-4">
-        <h3 class="font-bold">${escapeHtml(car.model)}</h3>
-        <p class="text-sm text-gray-300">${car.year || '—'} • ${car.km ? car.km.toLocaleString('fr-FR') + ' km' : 'km ?'}</p>
-      </div>
-      <div class="p-4 space-y-1.5 text-sm">
-        <div class="flex justify-between"><span class="text-gray-500">Événements</span><span class="font-medium">${events.length}</span></div>
-        <div class="flex justify-between"><span class="text-gray-500">Dépenses</span><span class="font-medium">${totalSpent.toLocaleString('fr-FR', {style:'currency', currency:'EUR'})}</span></div>
-        <div class="flex justify-between"><span class="text-gray-500">Dernier</span><span class="font-medium">${lastEvent ? formatDate(lastEvent.date) : '—'}</span></div>
+  box.innerHTML = d.cars.map(c => {
+    const ev = d.events.filter(e => e.carId === c.id);
+    const spent = ev.reduce((s,e) => s + (+e.cost||0), 0);
+    const last = ev.sort((a,b) => new Date(b.date)-new Date(a.date))[0];
+    return `<div class="card overflow-hidden">
+      <div class="p-4">
+        <div class="flex justify-between items-start gap-3">
+          <div>
+            <h3 class="font-semibold text-[15px] tracking-tight">${esc(c.model)}</h3>
+            <p class="text-zinc-500 text-[12px] mt-0.5">${c.year||'—'} · ${c.km ? c.km.toLocaleString('fr-FR')+' km' : 'km ?'}</p>
+          </div>
+          <div class="w-9 h-9 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 text-[10px] font-bold shrink-0">SC</div>
+        </div>
+        <div class="flex gap-5 mt-4 text-[12px]">
+          <div><span class="text-zinc-500 block">Events</span><span class="font-semibold">${ev.length}</span></div>
+          <div><span class="text-zinc-500 block">Dépenses</span><span class="font-semibold">${spent.toLocaleString('fr-FR',{style:'currency',currency:'EUR'})}</span></div>
+          <div><span class="text-zinc-500 block">Dernier</span><span class="font-semibold">${last ? fmtDate(last.date) : '—'}</span></div>
+        </div>
       </div>
       <div class="px-4 pb-4 flex gap-2">
-        <button onclick="selectCarAndShow('${car.id}', 'timeline')" class="flex-1 text-sm bg-gray-100 hover:bg-gray-200 py-2 rounded-lg">Timeline</button>
-        <button onclick="selectCarAndShow('${car.id}', 'add')" class="flex-1 text-sm bg-red-50 text-red-700 hover:bg-red-100 py-2 rounded-lg">+ Event</button>
+        <button onclick="select('${c.id}','timeline')" class="btn btn-ghost flex-1 h-9 text-[12px]">Timeline</button>
+        <button onclick="select('${c.id}','add')" class="btn flex-1 h-9 text-[12px] bg-rose-500/15 text-rose-400">+ Event</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function selectCarAndShow(carId, view) {
-  showView(view);
+function select(id, view) {
+  go(view);
   setTimeout(() => {
-    ['event-car', 'timeline-car-filter', 'value-car', 'export-car'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = carId;
+    ['e-car','t-filter','v-car','x-car'].forEach(i => {
+      const el = document.getElementById(i);
+      if (el) el.value = id;
     });
     if (view === 'timeline') renderTimeline();
     if (view === 'value') estimateValue();
-  }, 50);
+  }, 30);
 }
 
-function populateCarSelects() {
-  const data = loadData();
-  const options = data.cars.map(c => `<option value="${c.id}">${escapeHtml(c.model)} ${c.year || ''}</option>`).join('');
+function fillSelects() {
+  const d = load();
+  const opts = d.cars.map(c => `<option value="${c.id}">${esc(c.model)} ${c.year||''}</option>`).join('');
   const empty = '<option value="">— Choisir —</option>';
-  ['event-car', 'timeline-car-filter', 'value-car', 'export-car'].forEach(id => {
+  ['e-car','v-car','x-car'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) {
-      const current = el.value;
-      el.innerHTML = (id === 'timeline-car-filter' ? '<option value="all">Toutes</option>' : empty) + options;
-      if (current) el.value = current;
-    }
+    if (el) { const cur = el.value; el.innerHTML = empty + opts; if (cur) el.value = cur; }
   });
+  const tf = document.getElementById('t-filter');
+  if (tf) { const cur = tf.value; tf.innerHTML = '<option value="all">Toutes</option>' + opts; if (cur) tf.value = cur; }
 }
 
-// ========== FORMS ==========
-document.getElementById('add-car-form')?.addEventListener('submit', function(e) {
+document.getElementById('form-car')?.addEventListener('submit', e => {
   e.preventDefault();
-  const data = loadData();
-  data.cars.push({
-    id: generateId(),
-    model: document.getElementById('car-model').value.trim(),
-    year: document.getElementById('car-year').value || null,
-    km: parseInt(document.getElementById('car-km').value) || null,
-    vin: document.getElementById('car-vin').value.trim() || null,
-    plate: document.getElementById('car-plate').value.trim() || null,
-    notes: document.getElementById('car-notes').value.trim() || null,
+  const d = load();
+  d.cars.push({
+    id: uid(),
+    model: document.getElementById('c-model').value.trim(),
+    year: document.getElementById('c-year').value || null,
+    km: +document.getElementById('c-km').value || null,
+    vin: document.getElementById('c-vin').value.trim() || null,
+    plate: document.getElementById('c-plate').value.trim() || null,
+    notes: document.getElementById('c-notes').value.trim() || null,
     createdAt: new Date().toISOString()
   });
-  saveData(data);
-  this.reset();
-  showView('dashboard');
+  save(d);
+  e.target.reset();
+  go('dashboard');
   renderCars();
 });
 
-document.getElementById('add-event-form')?.addEventListener('submit', async function(e) {
+document.getElementById('form-event')?.addEventListener('submit', async e => {
   e.preventDefault();
-  const data = loadData();
-  let photoData = null;
-  const fileInput = document.getElementById('event-photo');
-  if (fileInput.files?.[0]) {
-    photoData = await new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result);
-      r.onerror = rej;
-      r.readAsDataURL(fileInput.files[0]);
-    });
-  }
-
-  const event = {
-    id: generateId(),
-    carId: document.getElementById('event-car').value,
-    type: document.getElementById('event-type').value,
-    date: document.getElementById('event-date').value,
-    km: parseInt(document.getElementById('event-km').value) || null,
-    title: document.getElementById('event-title').value.trim(),
-    cost: parseFloat(document.getElementById('event-cost').value) || 0,
-    provider: document.getElementById('event-provider').value.trim() || null,
-    notes: document.getElementById('event-notes').value.trim() || null,
-    photo: photoData,
-    createdAt: new Date().toISOString()
+  const d = load();
+  let photo = null;
+  const f = document.getElementById('e-photo').files?.[0];
+  if (f) photo = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); });
+  const ev = {
+    id: uid(),
+    carId: document.getElementById('e-car').value,
+    type: document.getElementById('e-type').value,
+    date: document.getElementById('e-date').value,
+    km: +document.getElementById('e-km').value || null,
+    title: document.getElementById('e-title').value.trim(),
+    cost: +document.getElementById('e-cost').value || 0,
+    provider: document.getElementById('e-provider').value.trim() || null,
+    notes: document.getElementById('e-notes').value.trim() || null,
+    photo
   };
-
-  const car = data.cars.find(c => c.id === event.carId);
-  if (car && event.km && (!car.km || event.km > car.km)) car.km = event.km;
-
-  data.events.push(event);
-  saveData(data);
-  this.reset();
-  showView('timeline');
+  const car = d.cars.find(c => c.id === ev.carId);
+  if (car && ev.km && (!car.km || ev.km > car.km)) car.km = ev.km;
+  d.events.push(ev);
+  save(d);
+  e.target.reset();
+  go('timeline');
   renderTimeline();
 });
 
-// ========== TIMELINE ==========
 function renderTimeline() {
-  const data = loadData();
-  const filter = document.getElementById('timeline-car-filter')?.value || 'all';
-  let events = filter === 'all' ? data.events : data.events.filter(e => e.carId === filter);
-  events = events.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const container = document.getElementById('timeline-container');
-  if (!events.length) {
-    container.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun événement.</p>';
+  const d = load();
+  const filter = document.getElementById('t-filter')?.value || 'all';
+  let list = filter === 'all' ? d.events : d.events.filter(e => e.carId === filter);
+  list = list.sort((a,b) => new Date(b.date) - new Date(a.date));
+  const box = document.getElementById('timeline-list');
+  if (!list.length) {
+    box.innerHTML = '<p class="text-zinc-500 text-center py-12 text-[13px]">Aucun événement</p>';
     return;
   }
-
-  const typeLabels = {entretien:'Entretien', reparation:'Réparation', mod:'Modification', pneus:'Pneus', facture:'Facture', ct:'CT', assurance:'Assurance', autre:'Autre'};
-  const typeColors = {entretien:'bg-blue-100 text-blue-800', reparation:'bg-orange-100 text-orange-800', mod:'bg-purple-100 text-purple-800', pneus:'bg-green-100 text-green-800', facture:'bg-gray-100 text-gray-800', ct:'bg-yellow-100 text-yellow-800', assurance:'bg-indigo-100 text-indigo-800', autre:'bg-gray-100 text-gray-600'};
-
-  container.innerHTML = events.map((ev, idx) => {
-    const car = data.cars.find(c => c.id === ev.carId);
-    const isLast = idx === events.length - 1;
-    return `<div class="relative pb-8 ${isLast ? '' : 'timeline-item'}">
-      ${!isLast ? '<div class="timeline-line"></div>' : ''}
-      <div class="flex flex-col sm:flex-row sm:items-start gap-2">
-        <div class="text-sm text-gray-500 whitespace-nowrap pt-0.5 w-28">${formatDate(ev.date)}</div>
-        <div class="flex-1">
-          <div class="flex flex-wrap items-center gap-2 mb-1">
-            <span class="text-xs font-medium px-2 py-0.5 rounded ${typeColors[ev.type] || typeColors.autre}">${typeLabels[ev.type] || ev.type}</span>
-            ${car ? `<span class="text-xs text-gray-400">${escapeHtml(car.model)}</span>` : ''}
-            ${ev.km ? `<span class="text-xs text-gray-400">${ev.km.toLocaleString('fr-FR')} km</span>` : ''}
-          </div>
-          <h4 class="font-semibold">${escapeHtml(ev.title)}</h4>
-          <div class="text-sm text-gray-600 mt-1 space-y-0.5">
-            ${ev.provider ? `<div>Chez : ${escapeHtml(ev.provider)}</div>` : ''}
-            ${ev.cost ? `<div class="font-medium">${ev.cost.toLocaleString('fr-FR', {style:'currency', currency:'EUR'})}</div>` : ''}
-            ${ev.notes ? `<div class="text-gray-500">${escapeHtml(ev.notes)}</div>` : ''}
-          </div>
-          ${ev.photo ? `<img src="${ev.photo}" class="mt-2 max-h-28 rounded border cursor-pointer" onclick="window.open(this.src)">` : ''}
+  const labels = {entretien:'Entretien',reparation:'Réparation',mod:'Mod',pneus:'Pneus',facture:'Facture',ct:'CT',assurance:'Assurance',autre:'Autre'};
+  box.innerHTML = list.map(ev => {
+    const car = d.cars.find(c => c.id === ev.carId);
+    return `<div class="flex gap-3 pb-5">
+      <div class="flex flex-col items-center">
+        <div class="w-2.5 h-2.5 rounded-full bg-rose-500 mt-1.5 shrink-0"></div>
+        <div class="w-px flex-1 bg-white/[0.06] mt-1"></div>
+      </div>
+      <div class="flex-1 pb-1">
+        <div class="text-[11px] text-zinc-500 mb-0.5">${fmtDate(ev.date)}${ev.km ? ' · '+ev.km.toLocaleString('fr-FR')+' km' : ''}</div>
+        <div class="flex items-center gap-2 mb-0.5">
+          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/[0.05] text-zinc-400">${labels[ev.type]||ev.type}</span>
+          ${car ? `<span class="text-[11px] text-zinc-500">${esc(car.model)}</span>` : ''}
         </div>
+        <div class="font-medium text-[14px]">${esc(ev.title)}</div>
+        <div class="text-[12px] text-zinc-500 mt-0.5 space-y-0.5">
+          ${ev.provider ? `<div>${esc(ev.provider)}</div>` : ''}
+          ${ev.cost ? `<div class="text-zinc-300 font-medium">${ev.cost.toLocaleString('fr-FR',{style:'currency',currency:'EUR'})}</div>` : ''}
+          ${ev.notes ? `<div>${esc(ev.notes)}</div>` : ''}
+        </div>
+        ${ev.photo ? `<img src="${ev.photo}" class="mt-2 max-h-24 rounded-lg border border-white/10" onclick="window.open(this.src)">` : ''}
       </div>
     </div>`;
   }).join('');
 }
 
-// ========== VALUE ==========
 function estimateValue() {
-  const data = loadData();
-  const carId = document.getElementById('value-car')?.value;
-  const resultEl = document.getElementById('value-result');
-  if (!carId) { resultEl.classList.add('hidden'); return; }
-  const car = data.cars.find(c => c.id === carId);
+  const d = load();
+  const id = document.getElementById('v-car')?.value;
+  const box = document.getElementById('value-box');
+  if (!id) { box.classList.add('hidden'); return; }
+  const car = d.cars.find(c => c.id === id);
   if (!car) return;
+  const ev = d.events.filter(e => e.carId === id);
+  const spent = ev.reduce((s,e) => s+(+e.cost||0),0);
+  const mods = ev.filter(e => e.type==='mod').length;
+  const maint = ev.filter(e => ['entretien','reparation'].includes(e.type)).length;
 
-  const events = data.events.filter(e => e.carId === carId);
-  const totalSpent = events.reduce((s, e) => s + (parseFloat(e.cost) || 0), 0);
-  const modEvents = events.filter(e => e.type === 'mod');
-  const entretienCount = events.filter(e => ['entretien','reparation'].includes(e.type)).length;
+  let base = 28000;
+  const m = (car.model||'').toLowerCase();
+  if (m.includes('porsche')||m.includes('911')) base = 72000;
+  else if (m.includes('m3')||m.includes('m4')||m.includes('m2')) base = 48000;
+  else if (m.includes('amg')||m.includes('c63')||m.includes('e63')) base = 52000;
+  else if (m.includes('rs')) base = 42000;
+  else if (m.includes('supra')||m.includes('gtr')) base = 56000;
+  else if (m.includes('ferrari')||m.includes('lambo')||m.includes('mclaren')) base = 160000;
 
-  let base = 25000;
-  const m = (car.model || '').toLowerCase();
-  if (m.includes('porsche') || m.includes('911')) base = 70000;
-  else if (m.includes('m3') || m.includes('m4') || m.includes('m2')) base = 45000;
-  else if (m.includes('amg') || m.includes('c63') || m.includes('e63')) base = 50000;
-  else if (m.includes('rs3') || m.includes('rs5') || m.includes('rs')) base = 40000;
-  else if (m.includes('supra') || m.includes('gt-r') || m.includes('gtr')) base = 55000;
-  else if (m.includes('ferrari') || m.includes('lambo') || m.includes('mclaren')) base = 150000;
+  const age = 2026 - (+car.year||2018);
+  base *= Math.max(0.4, 1 - age*0.055);
+  const km = car.km||60000;
+  if (km>80000) base*=0.88;
+  if (km>120000) base*=0.78;
+  let bonus = 1;
+  if (maint>=3) bonus+=0.04;
+  if (ev.length>=5) bonus+=0.03;
+  if (spent>2000) bonus+=0.02;
+  let modF = mods ? Math.min(1.05, 0.96 + mods*0.02) : 1;
+  if (mods>3) modF = 0.92;
+  const est = Math.round(base*bonus*modF/100)*100;
 
-  const year = parseInt(car.year) || 2018;
-  const age = 2026 - year;
-  base *= Math.max(0.4, 1 - age * 0.06);
-
-  const km = car.km || 60000;
-  if (km > 80000) base *= 0.85;
-  if (km > 120000) base *= 0.75;
-
-  let historyBonus = 1;
-  if (entretienCount >= 3) historyBonus += 0.05;
-  if (events.length >= 5) historyBonus += 0.03;
-  if (totalSpent > 2000) historyBonus += 0.02;
-
-  let modFactor = 1;
-  if (modEvents.length > 0) {
-    modFactor = 0.95 + (modEvents.length * 0.02);
-    if (modEvents.length > 3) modFactor = 0.9;
-  }
-
-  const estimated = Math.round(base * historyBonus * modFactor / 100) * 100;
-
-  document.getElementById('value-amount').textContent = estimated.toLocaleString('fr-FR') + ' €';
+  document.getElementById('value-amount').textContent = est.toLocaleString('fr-FR')+' €';
   document.getElementById('value-details').innerHTML = `
-    <p>Base indicative : ~${Math.round(base).toLocaleString('fr-FR')} €</p>
-    <p>Bonus historique : +${Math.round((historyBonus-1)*100)}%</p>
-    <p>Facteur mods : ×${modFactor.toFixed(2)}</p>
-    <p class="mt-2 text-xs">Événements : ${events.length} • Dépenses trackées : ${totalSpent.toLocaleString('fr-FR', {style:'currency', currency:'EUR'})}</p>
-    <p class="text-xs text-orange-600 mt-1">⚠ Estimation purement indicative pour ce MVP.</p>`;
-  resultEl.classList.remove('hidden');
+    <p>Base : ~${Math.round(base).toLocaleString('fr-FR')} €</p>
+    <p>Bonus historique : +${Math.round((bonus-1)*100)}%</p>
+    <p>Mods : ×${modF.toFixed(2)}</p>
+    <p class="text-[11px] text-zinc-500 mt-2">${ev.length} événements · ${spent.toLocaleString('fr-FR',{style:'currency',currency:'EUR'})} trackés</p>
+    <p class="text-[11px] text-rose-400/80 mt-1">Estimation indicative uniquement</p>`;
+  box.classList.remove('hidden');
 }
 
-// ========== PDF ==========
-function exportPDF() {
-  const data = loadData();
-  const carId = document.getElementById('export-car')?.value;
-  if (!carId) { alert('Choisis une voiture'); return; }
-  const car = data.cars.find(c => c.id === carId);
-  if (!car) return;
+function addMsg(html, user) {
+  const box = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `max-w-[88%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed ${user ? 'bg-rose-500/20 text-rose-50 ml-auto rounded-br-md' : 'bg-white/[0.05] text-zinc-200 rounded-bl-md'}`;
+  div.innerHTML = html.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const t = input.value.trim();
+  if (!t) return;
+  addMsg(esc(t), true);
+  input.value = '';
+  setTimeout(() => addMsg(expert(t), false), 280 + Math.random()*200);
+}
+function ask(q) { document.getElementById('chat-input').value = q; sendChat(); }
 
-  const events = data.events.filter(e => e.carId === carId).sort((a, b) => new Date(a.date) - new Date(b.date));
+function exportPDF() {
+  const d = load();
+  const id = document.getElementById('x-car')?.value;
+  if (!id) return alert('Choisis une voiture');
+  const car = d.cars.find(c => c.id === id);
+  if (!car) return;
+  const list = d.events.filter(e => e.carId === id).sort((a,b) => new Date(a.date)-new Date(b.date));
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   let y = 20;
-
-  doc.setFontSize(18); doc.setTextColor(180, 0, 0);
+  doc.setFontSize(16); doc.setTextColor(190,20,60);
   doc.text('SPORTS CAR PASSPORT', 20, y); y += 8;
-  doc.setFontSize(10); doc.setTextColor(80);
-  doc.text('Historique documenté – ' + new Date().toLocaleDateString('fr-FR'), 20, y); y += 12;
-
+  doc.setFontSize(10); doc.setTextColor(100);
+  doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR'), 20, y); y += 12;
   doc.setFontSize(13); doc.setTextColor(0);
   doc.text(car.model, 20, y); y += 6;
-  doc.setFontSize(9); doc.setTextColor(60);
-  if (car.year) { doc.text('Année : ' + car.year, 20, y); y += 4; }
-  if (car.km) { doc.text('Km : ' + car.km.toLocaleString('fr-FR'), 20, y); y += 4; }
-  if (car.plate) { doc.text('Immat. : ' + car.plate, 20, y); y += 4; }
-  if (car.vin) { doc.text('VIN : ' + car.vin, 20, y); y += 4; }
+  doc.setFontSize(9); doc.setTextColor(80);
+  if (car.year) { doc.text('Année : '+car.year, 20, y); y+=4; }
+  if (car.km) { doc.text('Km : '+car.km.toLocaleString('fr-FR'), 20, y); y+=4; }
+  if (car.plate) { doc.text('Immat. : '+car.plate, 20, y); y+=4; }
   y += 6;
-
   doc.setFontSize(11); doc.setTextColor(0);
-  doc.text('Historique des événements', 20, y); y += 7;
-
+  doc.text('Historique', 20, y); y += 7;
   doc.setFontSize(8);
-  events.forEach(ev => {
+  list.forEach(ev => {
     if (y > 270) { doc.addPage(); y = 20; }
-    const typeLabel = {entretien:'Entretien', reparation:'Réparation', mod:'Modification', pneus:'Pneus', facture:'Facture', ct:'CT', assurance:'Assurance', autre:'Autre'}[ev.type] || ev.type;
-    doc.setFont(undefined, 'bold'); doc.setTextColor(0);
-    doc.text(formatDate(ev.date) + ' – ' + typeLabel, 20, y); y += 3.5;
-    doc.setFont(undefined, 'normal'); doc.setTextColor(40);
-    doc.text(ev.title, 25, y); y += 3.5;
-    if (ev.provider) { doc.text('Prestataire : ' + ev.provider, 25, y); y += 3.5; }
-    if (ev.cost) { doc.text('Coût : ' + ev.cost.toLocaleString('fr-FR') + ' €', 25, y); y += 3.5; }
-    if (ev.km) { doc.text('Km : ' + ev.km.toLocaleString('fr-FR'), 25, y); y += 3.5; }
+    doc.setFont(undefined,'bold'); doc.text(fmtDate(ev.date)+' – '+ev.type, 20, y); y+=3.5;
+    doc.setFont(undefined,'normal'); doc.text(ev.title, 25, y); y+=3.5;
+    if (ev.provider) { doc.text(ev.provider, 25, y); y+=3.5; }
+    if (ev.cost) { doc.text(ev.cost+' €', 25, y); y+=3.5; }
     y += 3;
   });
-
-  doc.save('Passeport_' + car.model.replace(/\s+/g, '_') + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  doc.save('Passeport_'+car.model.replace(/\s+/g,'_')+'.pdf');
 }
 
-// ========== HELPERS ==========
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
-  const dateInput = document.getElementById('event-date');
-  if (dateInput) dateInput.valueAsDate = new Date();
-  showView('dashboard');
+  const di = document.getElementById('e-date');
+  if (di) di.valueAsDate = new Date();
+  go('dashboard');
   renderCars();
-  populateCarSelects();
+  fillSelects();
 });
