@@ -3,177 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#050505">
+  <meta name="theme-color" content="#000">
   <title>Sports Car Passport</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    body {
-      font-family: Inter, system-ui, sans-serif;
-      background: #050505;
-      color: #f5f5f5;
-      -webkit-font-smoothing: antialiased;
-      overscroll-behavior: none;
-      margin: 0;
-    }
+    body { font-family: Inter, system-ui, sans-serif; background: #000; color: #fff; -webkit-font-smoothing: antialiased; margin: 0; overscroll-behavior: none; }
     .view { display: none; }
-    .view.active { display: block; animation: rise 0.3s cubic-bezier(0.16,1,0.3,1); }
-    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-    .trophy {
-      position: relative;
-      border-radius: 20px;
+    .view.active { display: block; animation: up .28s cubic-bezier(.16,1,.3,1); }
+    @keyframes up { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
+    .stage { perspective: 1200px; perspective-origin: 50% 40%; }
+    .car-3d {
+      transform-style: preserve-3d;
+      transition: transform .5s cubic-bezier(.16,1,.3,1);
+      border-radius: 18px;
       overflow: hidden;
-      background: #0c0c0c;
-      border: 1px solid rgba(255,255,255,0.06);
-      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
-    }
-    .trophy:active { transform: scale(0.975); }
-    .trophy-img-wrap {
+      background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,0.07);
       position: relative;
-      height: 160px;
-      overflow: hidden;
-      background: #080808;
     }
-    .trophy-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
-    }
-    .trophy:hover .trophy-img { transform: scale(1.05); }
-    .trophy-light {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 70%;
-      background: linear-gradient(to top, rgba(255,255,255,0.07) 0%, transparent 70%);
+    .car-3d:active { transform: scale(0.97) rotateX(2deg); }
+    .car-3d-img { height: 170px; width: 100%; object-fit: cover; display: block; }
+    .car-3d-floor {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 55%;
+      background: linear-gradient(to top, rgba(255,255,255,0.09) 0%, transparent 100%);
       pointer-events: none;
     }
-    .trophy-glow {
-      position: absolute;
-      bottom: -20px; left: 20%; right: 20%;
-      height: 40px;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.12) 0%, transparent 70%);
-      filter: blur(12px);
-      pointer-events: none;
+    .car-3d-reflection {
+      position: absolute; bottom: -2px; left: 10%; right: 10%; height: 30px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.15) 0%, transparent 70%);
+      filter: blur(10px); pointer-events: none;
     }
-    .trophy-body { padding: 16px 18px 18px; position: relative; z-index: 2; }
-    .trophy-name { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
-    .trophy-meta { font-size: 12px; color: #71717a; margin-top: 3px; }
+    .car-3d-info {
+      padding: 14px 16px 16px; position: relative; z-index: 2;
+      background: linear-gradient(to top, #0a0a0a 60%, transparent);
+    }
     input, select, textarea {
-      width: 100%;
-      background: #0a0a0a !important;
-      border: 1px solid rgba(255,255,255,0.08) !important;
-      color: #f5f5f5 !important;
-      border-radius: 12px;
-      padding: 13px 14px;
-      font-size: 14px;
+      width: 100%; background: #0a0a0a !important; border: 1px solid rgba(255,255,255,0.1) !important;
+      color: #fff !important; border-radius: 12px; padding: 13px 14px; font-size: 14px;
     }
-    input:focus, select:focus, textarea:focus {
-      outline: none !important;
-      border-color: rgba(255,255,255,0.25) !important;
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
-    }
-    label { display: block; font-size: 11px; font-weight: 500; color: #71717a; margin-bottom: 6px; letter-spacing: 0.02em; text-transform: uppercase; }
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      font-weight: 600; border-radius: 12px; transition: all 0.15s;
-    }
+    input:focus, select:focus, textarea:focus { outline: none !important; border-color: rgba(255,255,255,0.3) !important; }
+    label { display: block; font-size: 11px; font-weight: 500; color: #666; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; border-radius: 12px; transition: all .15s; }
     .btn:active { transform: scale(0.97); }
-    .btn-primary { background: #f5f5f5; color: #0a0a0a; }
-    .btn-ghost { background: rgba(255,255,255,0.05); color: #a1a1aa; }
-    .nav-btn { color: #52525b; transition: color 0.15s; }
-    .nav-btn.active { color: #f5f5f5; }
+    .btn-white { background: #fff; color: #000; }
+    .btn-dark { background: rgba(255,255,255,0.08); color: #ccc; }
+    .nav-btn { color: #555; }
+    .nav-btn.active { color: #fff; }
     .safe-pb { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
     .ac-list {
-      position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 60;
-      background: #121212; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px; max-height: 280px; overflow-y: auto;
-      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.8);
+      position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 50;
+      background: #111; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px; max-height: 260px; overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
     }
-    .ac-item { padding: 11px 14px; display: flex; align-items: center; gap: 12px; }
-    .ac-item:active { background: rgba(255,255,255,0.05); }
+    .ac-item { padding: 11px 14px; display: flex; gap: 12px; align-items: center; }
+    .ac-item:active { background: rgba(255,255,255,0.06); }
     .ac-item img { width: 52px; height: 34px; object-fit: cover; border-radius: 6px; }
-    #chat-box { height: calc(100vh - 200px); min-height: 300px; }
-    #chat-messages::-webkit-scrollbar { width: 3px; }
-    #chat-messages::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-    .detail-stat {
-      background: #0c0c0c;
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 14px;
-      padding: 14px;
-      text-align: center;
-    }
+    .dash-card { background: #0c0c0c; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; }
+    .dash-num { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+    #chat-box { height: calc(100vh - 200px); min-height: 280px; }
   </style>
 </head>
 <body>
-
-  <header class="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-xl">
-    <div class="px-5 h-14 flex items-center justify-between">
-      <div class="text-[15px] font-semibold tracking-tight">Collection</div>
-      <button onclick="go('add-car')" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-400">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  <header class="sticky top-0 z-40 bg-black/90 backdrop-blur-xl">
+    <div class="px-5 flex items-center justify-between" style="height:52px">
+      <div class="text-[15px] font-semibold tracking-tight" id="header-title">Collection</div>
+      <button onclick="go('add-car')" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+        <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
   </header>
-
-  <main class="px-4 pt-2 pb-28">
-
+  <main class="px-4 pt-3 pb-28">
     <section id="v-dashboard" class="view active">
-      <div id="cars-list" class="space-y-4 pt-2"></div>
-      <div id="empty-state" class="hidden pt-16 px-4 text-center">
-        <div class="w-20 h-20 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-6">
-          <svg width="28" height="28" fill="none" stroke="#52525b" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      <div id="cars-list" class="stage space-y-5"></div>
+      <div id="empty-state" class="hidden pt-20 text-center px-6">
+        <div class="w-24 h-24 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-6 bg-white/[0.02]">
+          <svg width="32" height="32" fill="none" stroke="#444" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
-        <p class="text-[17px] font-medium text-zinc-200">Ta collection est vide</p>
-        <p class="text-[13px] text-zinc-500 mt-2 mb-8 leading-relaxed">Ajoute ta première sportive.<br>Elle s’affichera ici comme un trophée.</p>
-        <button onclick="go('add-car')" class="btn btn-primary h-12 px-8 text-[14px]">Ajouter une voiture</button>
+        <p class="text-[17px] font-medium">Ta collection est vide</p>
+        <p class="text-[13px] text-zinc-500 mt-2 mb-8">Ajoute ta première sportive.<br>Elle s’affichera ici en vitrine 3D.</p>
+        <button onclick="go('add-car')" class="btn btn-white h-12 px-8 text-[14px]">Ajouter une voiture</button>
       </div>
     </section>
-
     <section id="v-add-car" class="view">
-      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-6 flex items-center gap-1.5">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-        Collection
-      </button>
-      <h1 class="text-[22px] font-semibold tracking-tight mb-8">Nouvelle voiture</h1>
-      <form id="form-car" class="space-y-5">
+      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-6">← Collection</button>
+      <h1 class="text-[22px] font-semibold tracking-tight mb-7">Nouvelle voiture</h1>
+      <form id="form-car" class="space-y-4">
         <div class="relative">
           <label>Marque & modèle</label>
-          <input id="c-model" required placeholder="M2, 911, C63, RS3…" autocomplete="off" />
+          <input id="c-model" required placeholder="M2, 911, C63…" autocomplete="off" />
           <div id="ac-box" class="ac-list hidden"></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div><label>Année</label><input id="c-year" type="number" placeholder="2020" /></div>
-          <div><label>Kilométrage</label><input id="c-km" type="number" placeholder="45000" /></div>
+          <div><label>Km</label><input id="c-km" type="number" placeholder="45000" /></div>
         </div>
         <div><label>Immatriculation</label><input id="c-plate" placeholder="AB-123-CD" /></div>
-        <div><label>VIN</label><input id="c-vin" placeholder="WBS…" class="font-mono text-[13px]" /></div>
-        <div><label>Notes / Mods</label><textarea id="c-notes" rows="2" placeholder="Stage 1, Akrapovic…"></textarea></div>
-        <div id="preview-car" class="hidden trophy overflow-hidden">
-          <img id="preview-img" class="w-full h-28 object-cover" />
+        <div><label>VIN</label><input id="c-vin" class="font-mono text-[13px]" placeholder="WBS…" /></div>
+        <div><label>Notes / Mods</label><textarea id="c-notes" rows="2" placeholder="Stage 1…"></textarea></div>
+        <div id="preview-car" class="hidden car-3d">
+          <img id="preview-img" class="car-3d-img" style="height:100px" />
           <div class="p-3 text-[12px] text-zinc-400" id="preview-info"></div>
         </div>
-        <button type="submit" class="btn btn-primary w-full h-12 text-[14px] mt-2">Ajouter à la collection</button>
+        <button type="submit" class="btn btn-white w-full h-12 text-[14px]">Ajouter à la collection</button>
       </form>
     </section>
-
     <section id="v-detail" class="view">
-      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-4 flex items-center gap-1.5">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-        Collection
-      </button>
+      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-3">← Collection</button>
       <div id="detail-content"></div>
     </section>
-
     <section id="v-add" class="view">
-      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-6 flex items-center gap-1.5">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-        Retour
-      </button>
-      <h1 class="text-[22px] font-semibold tracking-tight mb-8">Nouvel événement</h1>
-      <form id="form-event" class="space-y-5">
+      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-6">← Retour</button>
+      <h1 class="text-[22px] font-semibold tracking-tight mb-7">Nouvel événement</h1>
+      <form id="form-event" class="space-y-4">
         <div><label>Voiture</label><select id="e-car" required></select></div>
         <div><label>Type</label>
           <select id="e-type" required>
@@ -193,75 +138,66 @@
         </div>
         <div><label>Titre</label><input id="e-title" required placeholder="Vidange + filtres" /></div>
         <div><label>Coût (€)</label><input id="e-cost" type="number" step="0.01" placeholder="450" /></div>
-        <div><label>Garage / Prestataire</label><input id="e-provider" placeholder="MG Motorsport" /></div>
+        <div><label>Garage</label><input id="e-provider" placeholder="MG Motorsport" /></div>
         <div><label>Notes</label><textarea id="e-notes" rows="2"></textarea></div>
-        <button type="submit" class="btn btn-primary w-full h-12 text-[14px]">Enregistrer</button>
+        <div><label>Photo facture</label><input id="e-photo" type="file" accept="image/*" class="text-zinc-400 text-[13px]" /></div>
+        <button type="submit" class="btn btn-white w-full h-12 text-[14px]">Enregistrer</button>
       </form>
     </section>
-
     <section id="v-timeline" class="view">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-[20px] font-semibold tracking-tight">Carnet d’entretien</h1>
-        <select id="t-filter" onchange="renderTimeline()" class="!w-auto !py-1.5 !px-3 !text-[12px] !rounded-lg"></select>
+      <div class="flex items-center justify-between mb-5">
+        <h1 class="text-[18px] font-semibold">Carnet d’entretien</h1>
+        <select id="t-filter" onchange="renderTimeline()" class="!w-auto !py-1.5 !px-3 !text-[12px]"></select>
       </div>
       <div id="timeline-list"></div>
     </section>
-
     <section id="v-value" class="view">
-      <h1 class="text-[20px] font-semibold tracking-tight mb-6">Estimation</h1>
-      <div class="trophy p-5">
-        <p class="text-zinc-500 text-[12px] mb-4">Basée sur ton historique saisi</p>
-        <select id="v-car" onchange="estimateValue()" class="mb-5"></select>
+      <h1 class="text-[18px] font-semibold mb-5">Estimation de valeur</h1>
+      <div class="dash-card">
+        <select id="v-car" onchange="estimateValue()" class="mb-4"></select>
         <div id="value-box" class="hidden">
-          <div id="value-amount" class="text-[28px] font-semibold tracking-tight mb-1">— €</div>
+          <div id="value-amount" class="dash-num mb-1">— €</div>
           <div id="value-details" class="text-[12px] text-zinc-500"></div>
         </div>
-        <button onclick="estimateValue()" class="btn btn-ghost w-full h-11 text-[13px] mt-5">Recalculer</button>
+        <button onclick="estimateValue()" class="btn btn-dark w-full h-11 text-[13px] mt-4">Recalculer</button>
       </div>
     </section>
-
     <section id="v-expert" class="view">
-      <div class="mb-4">
-        <h1 class="text-[20px] font-semibold tracking-tight">Expert IA</h1>
-        <p class="text-zinc-500 text-[12px] mt-0.5">100% offline · BMW M · AMG · Porsche</p>
-      </div>
-      <div class="trophy overflow-hidden flex flex-col" id="chat-box">
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-        <div class="border-t border-white/[0.05] p-3">
-          <div class="flex gap-2">
-            <input id="chat-input" placeholder="Pose ta question…" class="!py-2.5" onkeydown="if(event.key==='Enter')sendChat()" />
-            <button onclick="sendChat()" class="btn btn-primary !w-11 !h-11 !rounded-xl shrink-0 text-lg">→</button>
-          </div>
+      <h1 class="text-[18px] font-semibold mb-1">Expert IA</h1>
+      <p class="text-zinc-500 text-[12px] mb-4">100% offline</p>
+      <div class="dash-card overflow-hidden flex flex-col" id="chat-box">
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+        <div class="border-t border-white/5 p-3 flex gap-2">
+          <input id="chat-input" placeholder="Question…" class="!py-2.5" onkeydown="if(event.key==='Enter')sendChat()" />
+          <button onclick="sendChat()" class="btn btn-white !w-11 !h-11 !rounded-xl">→</button>
         </div>
       </div>
     </section>
   </main>
-
-  <nav class="fixed bottom-0 inset-x-0 z-50 bg-[#050505]/95 backdrop-blur-xl border-t border-white/[0.04] safe-pb">
+  <nav class="fixed bottom-0 inset-x-0 z-50 bg-black/95 backdrop-blur-xl border-t border-white/5 safe-pb">
     <div class="flex justify-around items-center h-14">
-      <button onclick="go('dashboard')" class="nav-btn active flex flex-col items-center gap-0.5 px-3" data-v="dashboard">
+      <button onclick="go('dashboard')" class="nav-btn active flex flex-col items-center gap-0.5" data-v="dashboard">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-        <span class="text-[9px] font-medium mt-0.5">Collection</span>
+        <span class="text-[9px] font-medium">Collection</span>
       </button>
-      <button onclick="go('add')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="add">
+      <button onclick="go('add')" class="nav-btn flex flex-col items-center gap-0.5" data-v="add">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        <span class="text-[9px] font-medium mt-0.5">Event</span>
+        <span class="text-[9px] font-medium">Event</span>
       </button>
-      <button onclick="go('timeline')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="timeline">
+      <button onclick="go('timeline')" class="nav-btn flex flex-col items-center gap-0.5" data-v="timeline">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        <span class="text-[9px] font-medium mt-0.5">Carnet</span>
+        <span class="text-[9px] font-medium">Carnet</span>
       </button>
-      <button onclick="go('expert')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="expert">
+      <button onclick="go('expert')" class="nav-btn flex flex-col items-center gap-0.5" data-v="expert">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-        <span class="text-[9px] font-medium mt-0.5">Expert</span>
+        <span class="text-[9px] font-medium">Expert</span>
       </button>
-      <button onclick="go('value')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="value">
+      <button onclick="go('value')" class="nav-btn flex flex-col items-center gap-0.5" data-v="value">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span class="text-[9px] font-medium mt-0.5">Valeur</span>
+        <span class="text-[9px] font-medium">Valeur</span>
       </button>
     </div>
   </nav>
-
   <script src="cars-db.js"></script>
   <script src="app.js"></script>
 </body>
