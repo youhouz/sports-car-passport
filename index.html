@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#09090b">
   <title>Sports Car Passport</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,119 +14,130 @@
       theme: {
         extend: {
           colors: {
-            carbon: { 950: '#0a0a0b', 900: '#111113', 800: '#1a1a1d', 700: '#27272a' },
-            accent: { DEFAULT: '#e11d48', soft: '#fb7185' }
+            surface: { DEFAULT: '#09090b', raised: '#18181b', overlay: '#27272a' },
+            brand: { DEFAULT: '#f43f5e', muted: '#be123c' }
           },
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          boxShadow: {
+            'glow': '0 0 40px -10px rgba(244, 63, 94, 0.35)',
+            'card': '0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 24px -8px rgba(0,0,0,0.6)'
+          }
         }
       }
     }
   </script>
   <style>
-    * { -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0b; color: #fafafa; }
-    .view { display: none; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: #09090b;
+      color: #fafafa;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
+    .view { display: none; animation: fadeIn 0.2s ease; }
     .view.active { display: block; }
-    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); }
-    .card-car { background: linear-gradient(145deg, #1a1a1d 0%, #111113 100%); border: 1px solid rgba(255,255,255,0.06); }
-    .btn-primary { background: linear-gradient(135deg, #e11d48, #be123c); }
-    .btn-primary:active { transform: scale(0.98); }
-    .nav-item.active { color: #e11d48; }
-    .nav-item.active svg { stroke: #e11d48; }
-    input, select, textarea { background: #1a1a1d !important; border: 1px solid rgba(255,255,255,0.08) !important; color: #fafafa !important; }
-    input::placeholder, textarea::placeholder { color: #71717a !important; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #e11d48 !important; box-shadow: 0 0 0 2px rgba(225,29,72,0.2); }
-    .timeline-dot { width: 10px; height: 10px; background: #e11d48; border-radius: 50%; border: 2px solid #0a0a0b; }
-    #chat-messages::-webkit-scrollbar { width: 4px; }
-    #chat-messages::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    .card {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      box-shadow: 0 1px 0 0 rgba(255,255,255,0.04) inset;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 600; border-radius: 12px; transition: all 0.15s ease;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(180deg, #f43f5e 0%, #e11d48 100%);
+      color: white;
+      box-shadow: 0 1px 0 0 rgba(255,255,255,0.15) inset, 0 4px 12px -2px rgba(225,29,72,0.4);
+    }
+    .btn-ghost { background: rgba(255,255,255,0.04); color: #a1a1aa; }
+    .btn-ghost:active { background: rgba(255,255,255,0.08); }
+    input, select, textarea {
+      width: 100%;
+      background: #09090b !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: #fafafa !important;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none !important;
+      border-color: #f43f5e !important;
+      box-shadow: 0 0 0 3px rgba(244,63,94,0.15);
+    }
+    input::placeholder, textarea::placeholder { color: #52525b !important; }
+    label { display: block; font-size: 12px; font-weight: 500; color: #71717a; margin-bottom: 6px; }
+    .nav-btn { color: #71717a; transition: color 0.15s; }
+    .nav-btn.active { color: #f43f5e; }
+    .nav-btn.active svg { stroke: #f43f5e; }
+    #chat-box { height: calc(100vh - 210px); min-height: 320px; }
+    #chat-messages::-webkit-scrollbar { width: 3px; }
+    #chat-messages::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+    .safe-pb { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   </style>
 </head>
-<body class="bg-carbon-950 text-white min-h-screen pb-24">
+<body class="bg-surface text-white min-h-screen">
 
-  <!-- Top Header -->
-  <header class="sticky top-0 z-40 bg-carbon-950/90 backdrop-blur-xl border-b border-white/5">
-    <div class="px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl btn-primary flex items-center justify-center font-bold text-sm tracking-tight shadow-lg shadow-rose-900/40">SC</div>
+  <header class="sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-white/[0.04]">
+    <div class="px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center text-[11px] font-bold shadow-glow">SC</div>
         <div>
-          <h1 class="text-[15px] font-bold tracking-tight leading-none">Sports Car Passport</h1>
-          <p class="text-[10px] text-zinc-500 mt-0.5">Historique • Expert IA offline</p>
+          <div class="text-[13px] font-semibold tracking-tight leading-none">Sports Car Passport</div>
+          <div class="text-[10px] text-zinc-500 mt-0.5">Historique · Expert IA</div>
         </div>
       </div>
-      <button onclick="showView('add-car')" class="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-zinc-300 active:bg-white/10">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      <button onclick="go('add-car')" class="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center text-zinc-400 active:bg-white/10">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
   </header>
 
-  <main class="px-4 pt-4">
+  <main class="px-4 pt-5 pb-28">
 
-    <!-- DASHBOARD -->
-    <section id="view-dashboard" class="view active">
-      <div class="mb-5">
-        <h2 class="text-xl font-bold tracking-tight">Mon garage</h2>
-        <p class="text-zinc-500 text-sm mt-0.5">Tes sportives, ton historique, ta valeur.</p>
+    <section id="v-dashboard" class="view active">
+      <div class="mb-6">
+        <h1 class="text-[22px] font-bold tracking-tight">Mon garage</h1>
+        <p class="text-zinc-500 text-[13px] mt-1">Tes sportives · historique · valeur</p>
       </div>
-      <div id="cars-list" class="space-y-3 mb-6"></div>
-      <button onclick="showView('add-car')" class="w-full btn-primary text-white font-semibold py-3.5 rounded-2xl text-sm shadow-lg shadow-rose-900/30 active:scale-[0.98] transition">
-        + Ajouter une sportive
-      </button>
+      <div id="cars-list" class="space-y-3 mb-5"></div>
+      <button onclick="go('add-car')" class="btn btn-primary w-full h-12 text-[14px]">+ Ajouter une sportive</button>
     </section>
 
-    <!-- ADD CAR -->
-    <section id="view-add-car" class="view">
-      <button onclick="showView('dashboard')" class="text-zinc-400 text-sm mb-4 flex items-center gap-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        Retour
+    <section id="v-add-car" class="view">
+      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-5 flex items-center gap-1">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Retour
       </button>
-      <h2 class="text-xl font-bold mb-5">Nouvelle voiture</h2>
-      <form id="add-car-form" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Marque & Modèle *</label>
-          <input type="text" id="car-model" required placeholder="BMW M2 Competition" class="w-full rounded-xl px-4 py-3 text-sm">
-        </div>
+      <h1 class="text-[22px] font-bold tracking-tight mb-6">Nouvelle voiture</h1>
+      <form id="form-car" class="space-y-4">
+        <div><label>Marque & Modèle *</label><input id="c-model" required placeholder="BMW M2 Competition" /></div>
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Année</label>
-            <input type="number" id="car-year" placeholder="2020" class="w-full rounded-xl px-4 py-3 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Km actuel</label>
-            <input type="number" id="car-km" placeholder="45000" class="w-full rounded-xl px-4 py-3 text-sm">
-          </div>
+          <div><label>Année</label><input id="c-year" type="number" placeholder="2020" /></div>
+          <div><label>Km actuel</label><input id="c-km" type="number" placeholder="45000" /></div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">VIN</label>
-          <input type="text" id="car-vin" placeholder="WBS..." class="w-full rounded-xl px-4 py-3 text-sm font-mono">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Immatriculation</label>
-          <input type="text" id="car-plate" placeholder="AB-123-CD" class="w-full rounded-xl px-4 py-3 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Mods / Notes</label>
-          <textarea id="car-notes" rows="2" placeholder="Stage 1, Akrapovic, coilovers..." class="w-full rounded-xl px-4 py-3 text-sm"></textarea>
-        </div>
-        <button type="submit" class="w-full btn-primary text-white font-semibold py-3.5 rounded-2xl text-sm mt-2">Enregistrer</button>
+        <div><label>VIN</label><input id="c-vin" placeholder="WBS..." class="font-mono text-[13px]" /></div>
+        <div><label>Immatriculation</label><input id="c-plate" placeholder="AB-123-CD" /></div>
+        <div><label>Mods / Notes</label><textarea id="c-notes" rows="2" placeholder="Stage 1, Akrapovic..."></textarea></div>
+        <button type="submit" class="btn btn-primary w-full h-12 text-[14px] mt-2">Enregistrer</button>
       </form>
     </section>
 
-    <!-- ADD EVENT -->
-    <section id="view-add" class="view">
-      <button onclick="showView('dashboard')" class="text-zinc-400 text-sm mb-4 flex items-center gap-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        Retour
+    <section id="v-add" class="view">
+      <button onclick="go('dashboard')" class="text-zinc-500 text-[13px] mb-5 flex items-center gap-1">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Retour
       </button>
-      <h2 class="text-xl font-bold mb-5">Nouvel événement</h2>
-      <form id="add-event-form" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Voiture *</label>
-          <select id="event-car" required class="w-full rounded-xl px-4 py-3 text-sm"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Type *</label>
-          <select id="event-type" required class="w-full border rounded-xl px-4 py-3 text-sm">
+      <h1 class="text-[22px] font-bold tracking-tight mb-6">Nouvel événement</h1>
+      <form id="form-event" class="space-y-4">
+        <div><label>Voiture *</label><select id="e-car" required></select></div>
+        <div><label>Type *</label>
+          <select id="e-type" required>
             <option value="entretien">Entretien / Révision</option>
             <option value="reparation">Réparation</option>
             <option value="mod">Modification / Stage</option>
@@ -137,120 +149,92 @@
           </select>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Date *</label>
-            <input type="date" id="event-date" required class="w-full rounded-xl px-4 py-3 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Km</label>
-            <input type="number" id="event-km" placeholder="45000" class="w-full rounded-xl px-4 py-3 text-sm">
-          </div>
+          <div><label>Date *</label><input id="e-date" type="date" required /></div>
+          <div><label>Km</label><input id="e-km" type="number" placeholder="45000" /></div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Titre *</label>
-          <input type="text" id="event-title" required placeholder="Vidange + filtres" class="w-full rounded-xl px-4 py-3 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Coût (€)</label>
-          <input type="number" id="event-cost" step="0.01" placeholder="450" class="w-full rounded-xl px-4 py-3 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Garage / Prestataire</label>
-          <input type="text" id="event-provider" placeholder="MG Motorsport" class="w-full rounded-xl px-4 py-3 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Notes</label>
-          <textarea id="event-notes" rows="2" class="w-full rounded-xl px-4 py-3 text-sm"></textarea>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Photo facture</label>
-          <input type="file" id="event-photo" accept="image/*" class="w-full text-sm text-zinc-400">
-        </div>
-        <button type="submit" class="w-full btn-primary text-white font-semibold py-3.5 rounded-2xl text-sm">Ajouter</button>
+        <div><label>Titre *</label><input id="e-title" required placeholder="Vidange + filtres" /></div>
+        <div><label>Coût (€)</label><input id="e-cost" type="number" step="0.01" placeholder="450" /></div>
+        <div><label>Garage / Prestataire</label><input id="e-provider" placeholder="MG Motorsport" /></div>
+        <div><label>Notes</label><textarea id="e-notes" rows="2"></textarea></div>
+        <div><label>Photo facture</label><input id="e-photo" type="file" accept="image/*" class="text-zinc-500 text-[13px]" /></div>
+        <button type="submit" class="btn btn-primary w-full h-12 text-[14px]">Ajouter</button>
       </form>
     </section>
 
-    <!-- TIMELINE -->
-    <section id="view-timeline" class="view">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold">Timeline</h2>
-        <select id="timeline-car-filter" onchange="renderTimeline()" class="rounded-xl px-3 py-2 text-xs bg-carbon-800 border-white/10"></select>
+    <section id="v-timeline" class="view">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-[22px] font-bold tracking-tight">Timeline</h1>
+        <select id="t-filter" onchange="renderTimeline()" class="!w-auto !py-1.5 !px-3 !text-[12px] !rounded-lg"></select>
       </div>
-      <div id="timeline-container" class="space-y-0"></div>
+      <div id="timeline-list"></div>
     </section>
 
-    <!-- VALUE -->
-    <section id="view-value" class="view">
-      <h2 class="text-xl font-bold mb-5">Estimation de valeur</h2>
-      <div class="card-car rounded-2xl p-5">
-        <p class="text-zinc-500 text-xs mb-4">Estimation indicative basée sur ton historique réel.</p>
-        <select id="value-car" onchange="estimateValue()" class="w-full rounded-xl px-4 py-3 text-sm mb-4"></select>
-        <div id="value-result" class="hidden">
-          <div class="text-3xl font-extrabold text-accent tracking-tight mb-2" id="value-amount">— €</div>
-          <div class="text-sm text-zinc-400 space-y-1" id="value-details"></div>
+    <section id="v-value" class="view">
+      <h1 class="text-[22px] font-bold tracking-tight mb-6">Valeur</h1>
+      <div class="card p-5">
+        <p class="text-zinc-500 text-[12px] mb-4">Estimation indicative basée sur ton historique.</p>
+        <select id="v-car" onchange="estimateValue()" class="mb-5"></select>
+        <div id="value-box" class="hidden">
+          <div id="value-amount" class="text-[32px] font-extrabold tracking-tight text-rose-400 mb-2">— €</div>
+          <div id="value-details" class="text-[13px] text-zinc-400 space-y-1"></div>
         </div>
-        <button onclick="estimateValue()" class="mt-4 w-full bg-white/5 hover:bg-white/10 text-white font-medium py-3 rounded-xl text-sm transition">Recalculer</button>
+        <button onclick="estimateValue()" class="btn btn-ghost w-full h-11 text-[13px] mt-4">Recalculer</button>
       </div>
     </section>
 
-    <!-- EXPERT IA -->
-    <section id="view-expert" class="view">
+    <section id="v-expert" class="view">
       <div class="mb-4">
-        <h2 class="text-xl font-bold">Expert IA</h2>
-        <p class="text-zinc-500 text-xs mt-0.5">100% offline • BMW M • AMG • Porsche • RS</p>
+        <h1 class="text-[22px] font-bold tracking-tight">Expert IA</h1>
+        <p class="text-zinc-500 text-[12px] mt-0.5">100% offline · BMW M · AMG · Porsche</p>
       </div>
-      <div class="card-car rounded-2xl overflow-hidden flex flex-col" style="height: calc(100vh - 220px);">
+      <div class="card overflow-hidden flex flex-col" id="chat-box">
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-        <div class="border-t border-white/5 p-3 bg-carbon-900/80">
+        <div class="border-t border-white/[0.04] p-3 bg-surface-raised">
           <div class="flex gap-2">
-            <input type="text" id="chat-input" placeholder="Pose ta question..." 
-                   class="flex-1 rounded-xl px-4 py-2.5 text-sm"
-                   onkeydown="if(event.key==='Enter') sendChat()">
-            <button onclick="sendChat()" class="btn-primary text-white font-semibold px-4 py-2.5 rounded-xl text-sm">→</button>
+            <input id="chat-input" placeholder="Pose ta question…" class="!py-2.5" onkeydown="if(event.key==='Enter')sendChat()" />
+            <button onclick="sendChat()" class="btn btn-primary !w-11 !h-11 !rounded-xl shrink-0">→</button>
           </div>
           <div class="flex flex-wrap gap-1.5 mt-2.5">
-            <button onclick="askQuick('problèmes courants BMW M')" class="text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full text-zinc-300">BMW M</button>
-            <button onclick="askQuick('problèmes Porsche 911')" class="text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full text-zinc-300">911</button>
-            <button onclick="askQuick('coût entretien AMG')" class="text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full text-zinc-300">AMG</button>
-            <button onclick="askQuick('rod bearings')" class="text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full text-zinc-300">Rod bearings</button>
-            <button onclick="askQuick('assurance sportive France')" class="text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full text-zinc-300">Assurance</button>
+            <button onclick="ask('problèmes BMW M')" class="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.04] text-zinc-400">BMW M</button>
+            <button onclick="ask('problèmes 911')" class="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.04] text-zinc-400">911</button>
+            <button onclick="ask('coût entretien AMG')" class="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.04] text-zinc-400">AMG</button>
+            <button onclick="ask('rod bearings')" class="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.04] text-zinc-400">Rod bearings</button>
+            <button onclick="ask('assurance sportive')" class="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.04] text-zinc-400">Assurance</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- EXPORT -->
-    <section id="view-export" class="view">
-      <h2 class="text-xl font-bold mb-5">Export PDF</h2>
-      <div class="card-car rounded-2xl p-5">
-        <p class="text-zinc-500 text-xs mb-4">Génère un passeport pro pour revente ou garage.</p>
-        <select id="export-car" class="w-full rounded-xl px-4 py-3 text-sm mb-4"></select>
-        <button onclick="exportPDF()" class="w-full btn-primary text-white font-semibold py-3.5 rounded-2xl text-sm">Télécharger le PDF</button>
+    <section id="v-export" class="view">
+      <h1 class="text-[22px] font-bold tracking-tight mb-6">Export PDF</h1>
+      <div class="card p-5">
+        <p class="text-zinc-500 text-[12px] mb-4">Passeport pro pour revente ou garage.</p>
+        <select id="x-car" class="mb-4"></select>
+        <button onclick="exportPDF()" class="btn btn-primary w-full h-12 text-[14px]">Télécharger le PDF</button>
       </div>
     </section>
   </main>
 
-  <!-- Bottom Navigation -->
-  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-carbon-950/95 backdrop-blur-xl border-t border-white/5 safe-bottom">
-    <div class="flex items-center justify-around py-2 px-1">
-      <button onclick="showView('dashboard')" class="nav-item active flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-500" data-view="dashboard">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
+  <nav class="fixed bottom-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl border-t border-white/[0.04] safe-pb">
+    <div class="flex justify-around items-center h-14">
+      <button onclick="go('dashboard')" class="nav-btn active flex flex-col items-center gap-0.5 px-3" data-v="dashboard">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
         <span class="text-[10px] font-medium">Garage</span>
       </button>
-      <button onclick="showView('add')" class="nav-item flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-500" data-view="add">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      <button onclick="go('add')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="add">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         <span class="text-[10px] font-medium">Event</span>
       </button>
-      <button onclick="showView('timeline')" class="nav-item flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-500" data-view="timeline">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <button onclick="go('timeline')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="timeline">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
         <span class="text-[10px] font-medium">Timeline</span>
       </button>
-      <button onclick="showView('expert')" class="nav-item flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-500" data-view="expert">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      <button onclick="go('expert')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="expert">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
         <span class="text-[10px] font-medium">Expert</span>
       </button>
-      <button onclick="showView('value')" class="nav-item flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-500" data-view="value">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <button onclick="go('value')" class="nav-btn flex flex-col items-center gap-0.5 px-3" data-v="value">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         <span class="text-[10px] font-medium">Valeur</span>
       </button>
     </div>
